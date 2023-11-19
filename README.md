@@ -51,7 +51,7 @@ https://github.com/apparentorder/reweb
 
 ## Testing and benchmarks
 
-Next 13.5 takes 800-900ms to initialise in Lambda native Node environment. This happens once-per-instance, meaning, this instance can deal with multiple requests without re-starting. Increased load on application will result in spin-up of multiple new instances, each taking this time to start.
+Next 13.5 takes 800-900ms to initialise in Lambda native Node environment (very similar result for Alpine container on Lambda). This happens once-per-instance, meaning, this instance can deal with multiple requests without re-starting. Increased load on application will result in spin-up of multiple new instances, each taking this time to start.
 
 <img width="712" alt="image" src="https://github.com/sladg/doc-next-lambda/assets/26263265/cc2d494e-8bad-4679-a500-5690e411f454">
 
