@@ -73,6 +73,10 @@ With this known, we need to route part of the traffic away from Next's server. T
 - Benchmark of different coldstarts for different size of instance and code. TL;DR docker is on average faster than big native functions.
   <br/>
   https://mikhail.io/serverless/coldstarts/aws/
+
+- Caching deep-dive for Next. Description of quite a few examples of what happens when.
+  <br/>
+  https://github.com/vercel/next.js/discussions/54075
   
 
 ## Testing and benchmarks
