@@ -12,6 +12,7 @@ NextJS expects normal HTTP request and response objects whilst AWS Lambda togeth
 Resources and solutions:
 - https://www.npmjs.com/package/serverless-http
 - https://github.com/aws-samples/lwa-nextjs-response-streaming-example
+- https://aws.amazon.com/blogs/compute/using-response-streaming-with-aws-lambda-web-adapter-to-optimize-performance/
 - https://github.com/awslabs/aws-lambda-web-adapter
 - build custom HTTP server which translates some methods to compatible ones
 
