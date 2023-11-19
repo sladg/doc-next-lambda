@@ -34,20 +34,33 @@ Lambda's runtime (if we ignore containerized option), uses Amazon Linux (multipl
 - [ ] TBD describe solution
 
 ## Knowledge
-One of the first topics on ISR in non-Vercel environment. Main outcome is Vercel providing guide with basics.
-https://github.com/vercel/next.js/discussions/19589
+- One of the first topics on ISR in non-Vercel environment. Main outcome is Vercel providing guide with basics.
+  <br/>
+  https://github.com/vercel/next.js/discussions/19589
 
-Vercel's guide to self-hosting. Most limited to non-serverless and containerised applications. Useful information about `isrMemoryCacheSize`.
-https://nextjs.org/docs/app/building-your-application/deploying#docker-image
+- Vercel's guide to self-hosting. Most limited to non-serverless and containerised applications. Useful information about `isrMemoryCacheSize`
+  <br/>
+  https://nextjs.org/docs/app/building-your-application/deploying#docker-image
 
-SAM template allowing Next on Lambda with streaming support. Primary infromation is env variable `AWS_LWA_INVOKE_MODE: response_stream` and `InvokeMode: RESPONSE_STREAM`.
-https://github.com/aws-samples/lwa-nextjs-response-streaming-example/blob/main/template.yaml
+- SAM template allowing Next on Lambda with streaming support. Primary infromation is env variable `AWS_LWA_INVOKE_MODE: response_stream` and `InvokeMode: RESPONSE_STREAM`.
+  <br/>
+  https://github.com/aws-samples/lwa-nextjs-response-streaming-example/blob/main/template.yaml
 
-Minimal example in Express showing how to use LWA outside of container, aka. in native runtime. This is implementable for NextJS.
-https://github.com/awslabs/aws-lambda-web-adapter/tree/main/examples/expressjs-zip
+- Minimal example in Express showing how to use LWA outside of container, aka. in native runtime. This is implementable for NextJS.
+  <br/>
+  https://github.com/awslabs/aws-lambda-web-adapter/tree/main/examples/expressjs-zip
 
-OG pioneer of runing HTTP servers on Lambda.
-https://github.com/apparentorder/reweb
+- OG pioneer of runing HTTP servers on Lambda.
+  <br/>
+  https://github.com/apparentorder/reweb
+
+- Solution for deploying NextJS via CDK & SST. It prepares neat ZIPs to be uploaded to AWS as ready functions. Could be used with Terraform as well.
+  <br/>
+  https://github.com/sst/open-next
+
+- CDK construct built on top of open-next. It's smaller and more straigh forward than SST.
+  <br/>
+  https://github.com/jetbridge/cdk-nextjs
 
 ## Testing and benchmarks
 
