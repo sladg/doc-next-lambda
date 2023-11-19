@@ -70,6 +70,11 @@ With this known, we need to route part of the traffic away from Next's server. T
   <br/>
   https://github.com/jetbridge/cdk-nextjs
 
+- Benchmark of different coldstarts for different size of instance and code. TL;DR docker is on average faster than big native functions.
+  <br/>
+  https://mikhail.io/serverless/coldstarts/aws/
+  
+
 ## Testing and benchmarks
 
 Next 13.5 takes 800-900ms to initialise in Lambda native Node environment (very similar result for Alpine container on Lambda). This happens once-per-instance, meaning, this instance can deal with multiple requests without re-starting. Increased load on application will result in spin-up of multiple new instances, each taking this time to start.
