@@ -96,3 +96,5 @@ Next 13.5 takes 800-900ms to initialise in Lambda native Node environment (very 
 
 <img width="712" alt="image" src="https://github.com/sladg/doc-next-lambda/assets/26263265/cc2d494e-8bad-4679-a500-5690e411f454">
 
+Next 14.0.3 takes 200-800ms to initialize in Lambda's container environment. This is big improvement compared to v13, however, this speed depends on size of the project.
+
