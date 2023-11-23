@@ -27,12 +27,22 @@ Next server takes quite a bit of time to fire-up at the beggining. Vercel is wor
 Next uses variety of caches and different mechanisms to improve performance. This results in rather over-complicated config for CloudFront.
 Additional problem comes from Lambda's non-writable storage. Next will try to cache (write it) sometimes, this operation can fail, but results in lost performance.
 
-- [ ] TBD describe solution, exploring EFS.
+EFS is complicate for setup and requires VPC, S3 is better option. Way to handle this globally is to patch FS functions with custom ones.
+There are multiple places where Next uses memory and/or filesystem as place to save data. Occurences are:
+- next/image uses it to save optimized image,
+- ISR uses it to invalidate/cache data.
+
+To ensure proper workings, we do following:
+- `experimental.isrMemoryCacheSize` is set to `0` to turn-off in-memory cache for ISR,
+- entrypoint JS file patches FS before initializing Next server (see: https://github.com/sladg/doc-next-lambda/blob/master/runner.js and https://github.com/sladg/doc-next-lambda/blob/master/s3fs.ts),
+- we set `CACHE_BUCKET_NAME` env var to lambda pointing to read-write accessible bucket lambda can use as cache.
+
 
 ### Binaries
 Lambda's runtime (if we ignore containerized option), uses Amazon Linux (multiple version options). This results in some of the binaries being possibly incompatible compared in runtime as buildtime used different OS / architecture. This is mostly notable in Prisma as their binaries take quite a lot of space.
 
 - [ ] TBD describe solution
+      Possible to solve with Docker Lambda. If we use Container type of deployment, we will install dependencies and build in target host so this problem is overcome.
 
 ### Size
 
