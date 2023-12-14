@@ -16,7 +16,13 @@ Resources and solutions:
 - https://github.com/awslabs/aws-lambda-web-adapter
 - build custom HTTP server which translates some methods to compatible ones
 
-- [ ] TBD describe solution
+#### Solution
+Based on AWS's Rust adapter solution.
+
+- Rust-based Runtime extension bundled into Layer which taps into Runtime API and translates events from/to Lambda events.
+- On lambda init, Runtime extension fires up Next server and waits for server to run before listening for Lambda events.
+
+See: [server.rs](server.rs)
 
 ### Cold starts
 Next server takes quite a bit of time to fire-up at the beggining. Vercel is working 
