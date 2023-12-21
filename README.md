@@ -1,7 +1,20 @@
 # Deploying Next to Lambda
+
 Summary of knowledge in regards to deploying NextJS to Amazon Lambdas.
 
 _TL;DR: NextJS in standalone mode + [lwa layer](https://github.com/awslabs/aws-lambda-web-adapter) = deployment on Function URL._
+
+- [Problems](#problems)
+  - [Network adapter](#network-adapter)
+    - [Solution](#solution)
+  - [Cold starts](#cold-starts)
+  - [Caching](#caching)
+  - [Binaries](#binaries)
+  - [NODE_OPTIONS](#node_options)
+  - [Size](#size)
+  - [Images](#images)
+- [Knowledge](#knowledge)
+- [Testing and benchmarks](#testing-and-benchmarks)
 
 ## Problems
 
@@ -10,6 +23,7 @@ _TL;DR: NextJS in standalone mode + [lwa layer](https://github.com/awslabs/aws-l
 NextJS expects normal HTTP request and response objects whilst AWS Lambda together with other AWS services provide event object. This incompatibility results in problematic translation of incoming data and results.
 
 Resources and solutions:
+
 - https://www.npmjs.com/package/serverless-http
 - https://github.com/aws-samples/lwa-nextjs-response-streaming-example
 - https://aws.amazon.com/blogs/compute/using-response-streaming-with-aws-lambda-web-adapter-to-optimize-performance/
@@ -17,34 +31,43 @@ Resources and solutions:
 - build custom HTTP server which translates some methods to compatible ones
 
 #### Solution
+
 Based on AWS's Rust adapter solution.
 
-- Rust-based Runtime extension bundled into Layer which taps into Runtime API and translates events from/to Lambda events.
-- On lambda init, Runtime extension fires up Next server and waits for server to run before listening for Lambda events.
+- Rust-based wrapper bundled into Layer which taps into Runtime API and translates events from/to Lambda events.
+- On lambda init, Runtime extension fires up Next server and waits for server to run before forwarding Lambda events.
 
-See: [server.rs](server.rs)
+See: [lambda-server-adapter](https://github.com/sladg/lambda-server-adapter)
 
 ### Cold starts
-Next server takes quite a bit of time to fire-up at the beggining. Vercel is working 
 
-- [ ] TBD describe solution, 
+Next server takes quite a bit of time to fire-up at the beggining. Vercel is working
+
+- [ ] TBD describe solution,
 
 ### Caching
+
 Next uses variety of caches and different mechanisms to improve performance. This results in rather over-complicated config for CloudFront.
 Additional problem comes from Lambda's non-writable storage. Next will try to cache (write it) sometimes, this operation can fail, but results in lost performance.
 
 EFS is complicate for setup and requires VPC, S3 is better option. Way to handle this globally is to patch FS functions with custom ones.
 There are multiple places where Next uses memory and/or filesystem as place to save data. Occurences are:
+
 - next/image uses it to save optimized image,
 - ISR uses it to invalidate/cache data.
 
 To ensure proper workings, we do following:
-- `experimental.isrMemoryCacheSize` is set to `0` to turn-off in-memory cache for ISR,
-- entrypoint JS file patches FS before initializing Next server (see: https://github.com/sladg/doc-next-lambda/blob/master/runner.js and https://github.com/sladg/doc-next-lambda/blob/master/s3fs.ts),
-- we set `CACHE_BUCKET_NAME` env var to lambda pointing to read-write accessible bucket lambda can use as cache.
 
+- `experimental.isrMemoryCacheSize` is set to `0` to turn-off in-memory cache for ISR,
+- ~~entrypoint JS file patches FS before initializing Next server (see: https://github.com/sladg/doc-next-lambda/blob/master/s3fs.ts)~~,
+- ~~we set `CACHE_BUCKET_NAME` env var to lambda pointing to read-write accessible bucket lambda can use as cache.~~
+
+Patching `node:fs` is wrong as it hugely affects the performance. This is not a sustainable solution unfortunately. After experimenting with different FS-based options (patching, EFS, mountpoints) I've concluded that this is currently not doable until Lambda allows tapping into Kernel (to allow for FUSE) or Next allows for customizing directory used for caching (to allow for EFS). Additional note on topic of caching, EFS as well as Memcache require VPC which results in complexity and additional costs.
+
+- [ ] TBD describe solution. Most likely `incrementalCacheHandlerPath` with S3. Images cached by Cloudfront / using custom optimizing solution.
 
 ### Binaries
+
 Lambda's runtime (if we ignore containerized option), uses Amazon Linux (multiple version options). This results in some of the binaries being possibly incompatible compared in runtime as buildtime used different OS / architecture. This is mostly notable in Prisma as their binaries take quite a lot of space.
 
 - [ ] TBD describe solution
@@ -62,7 +85,22 @@ With this known, we need to route part of the traffic away from Next's server. T
 
 - [ ] TBD describe solution
 
+### Images
+
+Next's image optimization is slow compared to other, non-JS, solutions. The approach here should keep simplicity in mind while allowing for extension. There are 3 options to choose from:
+
+- use Next's image optimization,
+- use Next's image optimization with Sharp layer,
+- use separate lambda (preferable in Python, Rust or similar) to handle image optimization, this option allows for using S3 as cache on opt-in basis.
+
+Next does not support customizing caching behaviour for images. It relies on FS and cannot be easily change/overwritten.
+
+See: [imaginex-lambda](https://github.com/sladg/imaginex-lambda)
+
+- [ ] TBD describe solution. This will be mostly likely distributed as public layer for easy plug-and-play.
+
 ## Knowledge
+
 - One of the first topics on ISR in non-Vercel environment. Main outcome is Vercel providing guide with basics.
   <br/>
   https://github.com/vercel/next.js/discussions/19589
@@ -98,7 +136,6 @@ With this known, we need to route part of the traffic away from Next's server. T
 - Caching deep-dive for Next. Description of quite a few examples of what happens when.
   <br/>
   https://github.com/vercel/next.js/discussions/54075
-  
 
 ## Testing and benchmarks
 
@@ -108,3 +145,4 @@ Next 13.5 takes 800-900ms to initialise in Lambda native Node environment (very 
 
 Next 14.0.3 takes 200-800ms to initialize in Lambda's container environment. This is big improvement compared to v13, however, this speed depends on size of the project.
 
+Additional note is that `/` ping takes extra 300+ms to respond depending on your `_app.tsx` and `getServerSideProps` configuration. Better option to check if server is running is to use `/api/ping` (or similar) endpoint with no dependencies in it. This results in approx. 250ms overhead in terms of waiting for Next to truly start.
