@@ -1,0 +1,2 @@
+nomic-embed-text-v1.5.Q8_0.gguf filter=lfs diff=lfs merge=lfs -text
+Postman[[:space:]]v9.31.28[[:space:]]for[[:space:]]macOS[[:space:]](arm64).zip filter=lfs diff=lfs merge=lfs -text
